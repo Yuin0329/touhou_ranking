@@ -1,0 +1,48 @@
+{
+  "total_records": 1068,
+  "successful_rounds": [
+    17,
+    18,
+    19,
+    20,
+    21
+  ],
+  "total_characters": 227,
+  "rounds_info": {
+    "17": {
+      "characters_count": 206,
+      "total_points": 288589,
+      "avg_points": 1400.9174757281553,
+      "max_points": 12951,
+      "min_points": 2
+    },
+    "18": {
+      "characters_count": 208,
+      "total_points": 363998,
+      "avg_points": 1749.9903846153845,
+      "max_points": 16723,
+      "min_points": 5
+    },
+    "19": {
+      "characters_count": 216,
+      "total_points": 366290,
+      "avg_points": 1695.787037037037,
+      "max_points": 17612,
+      "min_points": 5
+    },
+    "20": {
+      "characters_count": 217,
+      "total_points": 394812,
+      "avg_points": 1819.410138248848,
+      "max_points": 21959,
+      "min_points": 5
+    },
+    "21": {
+      "characters_count": 221,
+      "total_points": 531117,
+      "avg_points": 2403.244343891403,
+      "max_points": 27688,
+      "min_points": 3
+    }
+  }
+}

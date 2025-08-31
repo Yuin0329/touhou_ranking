@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>東方Project人氣投票排名</title>
+  <!-- 引用 Plotly -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #dc2626;
+      --bg-secondary: #fef2f2;
+      --bg-gradient: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+      --bg-gradient-dark: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
+      --text-primary: #000000;
+      --text-secondary: #000000;
+      --accent-primary: #dc2626;
+      --accent-secondary: #b91c1b;
+      --border-color: #fecaca;
+      --shadow: 0 2px 10px rgba(220, 38, 38, 0.15);
+      --container-bg: rgba(255, 255, 255, 0.95);
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #dc2626;
+      --bg-secondary: #fef2f2;
+      --bg-gradient: linear-gradient(135deg, #E6C200 0%, #FFA500 100%);
+      --bg-gradient-dark: linear-gradient(135deg, #E6C200 0%,#FFA500 100%);
+      --text-primary: #000000;
+      --text-secondary: #000000;
+      --accent-primary: #ef4444;
+      --accent-secondary: #dc2626;
+      --border-color: #450a0a;
+      --shadow: 0 2px 10px rgba(220, 38, 38, 0.25);
+      --container-bg: #1c1c1c34;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Noto Sans TC", sans-serif;
+      background: var(--bg-gradient-dark);
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+      min-height: 100vh;
+      background-attachment: fixed;
+      background-size: cover;
+      overflow-x: hidden;
+    }
+
+    /* 動態背景粒子效果 */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .particle {
+      position: absolute;
+      background: rgba(220, 38, 38, 0.12);
+      border-radius: 50%;
+      animation: float 20s infinite linear;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: linear-gradient(135deg, var(--accent-primary), #b91c1b);
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 25px rgba(220, 38, 38, 0.3);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.15) rotate(180deg);
+      box-shadow: 0 12px 35px rgba(220, 38, 38, 0.4);
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 20px auto;
+      background: var(--container-bg);
+      color: var(--text-primary);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(220, 38, 38, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+      animation: scan 3s ease-in-out infinite;
+    }
+
+    @keyframes scan {
+      0%, 100% { transform: translateX(-100%); }
+      50% { transform: translateX(100%); }
+    }
+
+    h1 {
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .controls {
+      margin: 20px 0;
+      padding: 20px;
+      background: rgba(220, 38, 38, 0.08);
+      border-radius: 16px;
+      border: 1px solid rgba(220, 38, 38, 0.15);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .controls::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, transparent, rgba(220, 38, 38, 0.05), transparent);
+      pointer-events: none;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    label {
+      font-weight: bold;
+      color: var(--text-secondary);
+    }
+
+    select, input {
+      padding: 12px 18px;
+      border: 2px solid rgba(220, 38, 38, 0.2);
+      border-radius: 12px;
+      font-size: 16px;
+      min-width: 200px;
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--text-primary);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .info {
+      margin: 15px 0;
+      padding: 12px;
+      background: var(--bg-secondary);
+      border-radius: 10px;
+      border-left: 4px solid var(--accent-primary);
+      color: var(--text-primary);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .info a {
+      color: var(--accent-primary);
+    }
+
+    #chart {
+      width: 100%;
+      height: 600px;
+      margin: 20px 0;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .stat-card {
+      background: rgba(220, 38, 38, 0.1);
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid rgba(220, 38, 38, 0.2);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.15), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .stat-card:hover::before {
+      left: 100%;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(220, 38, 38, 0.25);
+      border-color: rgba(220, 38, 38, 0.3);
+    }
+
+    .stat-title {
+      font-weight: bold;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--text-primary);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 50px;
+      color: var(--text-secondary);
+    }
+
+    .round-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    .round-btn {
+      padding: 8px 16px;
+      border: 2px solid var(--border-color);
+      border-radius: 5px;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+         .round-btn:hover {
+       border-color: var(--accent-primary);
+       background: var(--bg-secondary);
+     }
+
+    .round-btn.active {
+      border-color: var(--accent-primary);
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .search-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .search-results {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-top: none;
+      border-radius: 0 0 5px 5px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+    }
+
+    .search-result-item {
+      padding: 10px 15px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+
+         .search-result-item:hover {
+       background: var(--bg-secondary);
+     }
+
+    .search-result-item:last-child {
+      border-bottom: none;
+    }
+
+    .search-result-item.highlight {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    button {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--accent-primary), #b91c1b);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    button:hover::before {
+      left: 100%;
+    }
+
+    button:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+    }
+
+    button:active {
+      transform: translateY(-1px) scale(1.02);
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+      .container {
+        margin: 20px;
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 1.8em;
+      }
+
+      .control-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      select, input {
+        min-width: auto;
+        width: 100%;
+      }
+
+      .stats {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+      }
+
+      #chart {
+        height: 400px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        margin: 10px;
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 1.5em;
+      }
+
+      .controls {
+        padding: 15px;
+      }
+
+      .info {
+        padding: 10px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      #chart {
+        height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="particles" id="particles"></div>
+  
+  <button class="theme-toggle" onclick="toggleTheme()" title="切換深色模式">
+    🌙
+  </button>
+
+  <div class="container">
+    <h1>東方Project人氣投票排名統計</h1>
+    
+    <div class="info">東方Project人氣投票 
+      <h3> </h3>
+      <p>選擇角色查看其各年度人氣投票中的排名變化趨勢</p>
+      <p>數據來源：<a href="https://toho-vote.info" target="_blank" rel="noopener">toho-vote.info</a></p>
+    </div>
+    
+    <div class="controls">
+      <div class="control-row">
+        <label for="characterSelect">選擇角色：</label>
+        <select id="characterSelect">
+          <option value="">請選擇角色...</option>
+        </select>
+      </div>
+      
+      <div class="control-row">
+        <label for="characterSearch">搜尋角色：</label>
+        <div class="search-container">
+          <input type="text" id="characterSearch" placeholder="輸入角色名稱..." title="搜尋角色">
+          <div id="searchResults" class="search-results"></div>
+        </div>
+      </div>
+      
+      <div class="control-row">
+        <label for="roundRangeStart">顯示回數範圍：</label>
+        <input type="number" id="roundRangeStart" min="17" max="21" value="17" style="width: 80px;" title="起始回數">
+        <span>到</span>
+        <input type="number" id="roundRangeEnd" min="17" max="21" value="21" style="width: 80px;" title="結束回數">
+        <button onclick="updateChartRange()">更新圖表</button>
+      </div>
+    </div>
+    
+    <div id="loading" class="loading">
+      <p>正在載入數據...</p>
+    </div>
+    
+    <div id="chart"></div>
+    
+    <div id="stats" class="stats" style="display: none;">
+      <div class="stat-card">
+        <div class="stat-title">參與回數</div>
+        <div id="participationRounds" class="stat-value">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">最佳排名</div>
+        <div id="bestRank" class="stat-value">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">最差排名</div>
+        <div id="worstRank" class="stat-value">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">平均排名</div>
+        <div id="avgRank" class="stat-value">-</div>
+      </div>
+  </div>
+
+  <script>
+    let characters = [];
+    let voteData = {};
+    let allRounds = [];
+    let currentCharacter = '';
+    let searchResults = [];
+    let currentSearchIndex = -1;
+    let currentTheme = 'light';
+    
+    // 深色模式切換
+    function toggleTheme() {
+      currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+      document.body.setAttribute('data-theme', currentTheme);
+      
+      const themeToggle = document.querySelector('.theme-toggle');
+      if (currentTheme === 'dark') {
+        themeToggle.innerHTML = '💮☯';
+        themeToggle.title = '切換淺色模式';
+      } else {
+        themeToggle.innerHTML = '🌟🧹';
+        themeToggle.title = '切換深色模式';
+      }
+    }
+    
+    // 載入角色列表
+    async function loadCharacters() {
+      try {
+        const response = await fetch('characters.json');
+        characters = await response.json();
+        
+        const select = document.getElementById('characterSelect');
+        characters.forEach(character => {
+          const option = document.createElement('option');
+          option.value = character;
+          option.textContent = character;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        console.error('載入角色列表失敗:', error);
+        try {
+          const response = await fetch('characters.json');
+          characters = await response.json();
+          const select = document.getElementById('characterSelect');
+          characters.forEach(character => {
+            const option = document.createElement('option');
+            option.value = character;
+            option.textContent = character;
+            select.appendChild(option);
+          });
+        } catch (error2) {
+          console.error('載入備用角色列表也失敗:', error2);
+        }
+      }
+    }
+    
+    // 載入投票數據
+    async function loadVoteData() {
+      try {
+        const response = await fetch('touhou_vote_combined.csv');
+        const csvText = await response.text();
+        
+        const lines = csvText.split('\n');
+        
+        for (let i = 1; i < lines.length; i++) {
+          if (lines[i].trim()) {
+            const values = lines[i].match(/(".*?"|[^,]+)/g);
+            if (values && values.length >= 4) {
+              const round = values[0].replace(/"/g, '');
+              const rank = values[1].replace(/"/g, '');
+              const character = values[2].replace(/"/g, '');
+              const points = values[3].replace(/"/g, '');
+              
+              if (!voteData[character]) {
+                voteData[character] = {};
+              }
+              voteData[character][round] = {
+                rank: parseInt(rank),
+                points: parseInt(points)
+              };
+              
+              if (!allRounds.includes(parseInt(round))) {
+                allRounds.push(parseInt(round));
+              }
+            }
+          }
+        }
+        
+        allRounds.sort((a, b) => a - b);
+        
+        fillRoundSelectors();
+        
+        document.getElementById('loading').style.display = 'none';
+      } catch (error) {
+        console.error('載入投票數據失敗:', error);
+        document.getElementById('loading').innerHTML = '<p>載入數據失敗，請檢查文件是否存在</p>';
+      }
+    }
+    
+    // 填充回數選擇器
+    function fillRoundSelectors() {
+      const startSelect = document.getElementById('roundRangeStart');
+      const endSelect = document.getElementById('roundRangeEnd');
+      
+      allRounds.forEach(round => {
+        const startOption = document.createElement('option');
+        startOption.value = round;
+        startOption.textContent = round;
+        startSelect.appendChild(startOption);
+        
+        const endOption = document.createElement('option');
+        endOption.value = round;
+        endOption.textContent = round;
+        endSelect.appendChild(endOption);
+      });
+    }
+    
+    // 更新圖表
+    function updateChart(character, startRound = null, endRound = null) {
+      if (!character || !voteData[character]) {
+        document.getElementById('chart').innerHTML = '<p>請選擇角色</p>';
+        document.getElementById('stats').style.display = 'none';
+        return;
+      }
+      
+      currentCharacter = character;
+      const data = voteData[character];
+      let rounds = Object.keys(data).map(Number).sort((a, b) => a - b);
+      
+      if (startRound && endRound) {
+        rounds = rounds.filter(round => round >= startRound && round <= endRound);
+      }
+      
+      const ranks = rounds.map(round => data[round].rank);
+      
+      const trace = {
+        x: rounds,
+        y: ranks,
+        mode: 'lines+markers',
+        name: character,
+        line: {
+          color: '#007bff',
+          width: 3
+        },
+        marker: {
+          size: 10,
+          color: '#007bff'
+        }
+      };
+      
+      const layout = {
+        title: `${character} 歷年排名變化`,
+        xaxis: { 
+          title: "回數",
+          tickmode: 'linear',
+          tick0: Math.min(...rounds),
+          dtick: 1
+        },
+        yaxis: { 
+          title: "名次", 
+          autorange: "reversed",
+          range: [Math.max(...ranks) + 2, Math.min(...ranks) - 2],
+          tickmode: 'linear',
+          tick0: 1,
+          dtick: 1
+        },
+        showlegend: false,
+        margin: { t: 50, b: 50, l: 60, r: 30 }
+      };
+      
+      Plotly.newPlot('chart', [trace], layout);
+      
+      updateStats(character);
+    }
+    
+    // 更新圖表範圍
+    function updateChartRange() {
+      const startRound = parseInt(document.getElementById('roundRangeStart').value);
+      const endRound = parseInt(document.getElementById('roundRangeEnd').value);
+      
+      if (currentCharacter) {
+        updateChart(currentCharacter, startRound, endRound);
+      }
+    }
+    
+    // 更新統計信息
+    function updateStats(character) {
+      const data = voteData[character];
+      const statsDiv = document.getElementById('stats');
+      
+      if (data) {
+        const rounds = Object.keys(data).map(Number);
+        const ranks = rounds.map(round => data[round].rank);
+        const points = rounds.map(round => data[round].points);
+        
+        document.getElementById('participationRounds').textContent = rounds.length;
+        document.getElementById('bestRank').textContent = Math.min(...ranks);
+        document.getElementById('worstRank').textContent = Math.max(...ranks);
+        document.getElementById('avgRank').textContent = Math.round(ranks.reduce((a, b) => a + b, 0) / ranks.length);
+        
+        
+        
+        statsDiv.style.display = 'grid';
+      } else {
+        statsDiv.style.display = 'none';
+      }
+    }
+    
+    // 搜尋角色
+    function searchCharacters(query) {
+      if (!query || query.length < 1) {
+        hideSearchResults();
+        return;
+      }
+      
+      const results = characters.filter(character => 
+        character.toLowerCase().includes(query.toLowerCase())
+      ).slice(0, 10);
+      
+      showSearchResults(results);
+    }
+    
+    // 顯示搜尋結果
+    function showSearchResults(results) {
+      const searchResultsDiv = document.getElementById('searchResults');
+      searchResultsDiv.innerHTML = '';
+      
+      if (results.length === 0) {
+        searchResultsDiv.style.display = 'none';
+        return;
+      }
+      
+      results.forEach((character, index) => {
+        const item = document.createElement('div');
+        item.className = 'search-result-item';
+        item.textContent = character;
+        item.onclick = () => selectCharacter(character);
+        searchResultsDiv.appendChild(item);
+      });
+      
+      searchResultsDiv.style.display = 'block';
+      searchResults = results;
+      currentSearchIndex = -1;
+    }
+    
+    // 隱藏搜尋結果
+    function hideSearchResults() {
+      document.getElementById('searchResults').style.display = 'none';
+      searchResults = [];
+      currentSearchIndex = -1;
+    }
+    
+    // 選擇角色
+    function selectCharacter(character) {
+      document.getElementById('characterSearch').value = character;
+      document.getElementById('characterSelect').value = character;
+      hideSearchResults();
+      updateChart(character);
+    }
+    
+    // 處理鍵盤導航
+    function handleSearchKeydown(event) {
+      const searchResultsDiv = document.getElementById('searchResults');
+      
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        if (currentSearchIndex < searchResults.length - 1) {
+          currentSearchIndex++;
+          highlightSearchResult();
+        }
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        if (currentSearchIndex > 0) {
+          currentSearchIndex--;
+          highlightSearchResult();
+        }
+      } else if (event.key === 'Enter') {
+        event.preventDefault();
+        if (currentSearchIndex >= 0 && currentSearchIndex < searchResults.length) {
+          selectCharacter(searchResults[currentSearchIndex]);
+        }
+      } else if (event.key === 'Escape') {
+        hideSearchResults();
+      }
+    }
+    
+    // 高亮搜尋結果
+    function highlightSearchResult() {
+      const items = document.querySelectorAll('.search-result-item');
+      items.forEach((item, index) => {
+        if (index === currentSearchIndex) {
+          item.classList.add('highlight');
+        } else {
+          item.classList.remove('highlight');
+        }
+      });
+    }
+    
+    // 創建粒子效果
+    function createParticles() {
+      const particlesContainer = document.getElementById('particles');
+      const particleCount = 15;
+      
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        
+        const size = Math.random() * 4 + 2;
+        const startX = Math.random() * window.innerWidth;
+        const delay = Math.random() * 20;
+        
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        particle.style.left = startX + 'px';
+        particle.style.animationDelay = delay + 's';
+        particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+        
+        particlesContainer.appendChild(particle);
+      }
+    }
+    
+    // 初始化
+    async function init() {
+      await loadCharacters();
+      await loadVoteData();
+      
+      // 創建粒子效果
+      createParticles();
+      
+      document.getElementById('characterSelect').addEventListener('change', function() {
+        updateChart(this.value);
+      });
+      
+      const searchInput = document.getElementById('characterSearch');
+      searchInput.addEventListener('input', function() {
+        searchCharacters(this.value);
+      });
+      
+      searchInput.addEventListener('keydown', handleSearchKeydown);
+      
+      document.addEventListener('click', function(event) {
+        if (!event.target.closest('.search-container')) {
+          hideSearchResults();
+        }
+      });
+      
+      document.getElementById('characterSelect').value = '博麗 霊夢';
+      updateChart('博麗 霊夢');
+    }
+    
+    init();
+  </script>
+</body>
+</html> 
