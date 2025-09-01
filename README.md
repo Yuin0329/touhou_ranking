@@ -1,6 +1,6 @@
 # 東方Project人氣投票歷年排名追蹤
 
-網址：https://yuin0329.github.io/touhou_ranking/
+網址：https://yuin0329.github.io/touhou_ranking/ <b>
 用於爬取和視覺化東方Project人氣投票結果，支援第1回到第21回的完整數據分析
 
 
@@ -129,6 +129,7 @@ stats = processor.get_statistics()
 - 創建API接口
 - 添加數據庫支持
 - 實現自動化定期爬取
+
 
 
 
