@@ -118,7 +118,6 @@ stats = processor.get_statistics()
 - 需要安裝Chrome瀏覽器（Selenium會自動下載ChromeDriver）
 - 爬取所有21回數據可能需要較長時間（約30-60分鐘）
 - 網頁需要通過HTTP服務器訪問（不能直接打開HTML文件）
-- 建議定期備份爬取的數據
 - 某些早期回數的數據可能不完整或格式不同
 
 ## 未來功能
@@ -129,6 +128,7 @@ stats = processor.get_statistics()
 - 實現自動化定期爬取
 - 單年度排名總覽
 - 音樂部門及作品部門
+
 
 
 
