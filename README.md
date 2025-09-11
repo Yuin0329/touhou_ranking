@@ -1,7 +1,7 @@
 # 東方Project人氣投票歷年排名統計
 
 網址：https://yuin0329.github.io/touhou_ranking/ <br>
-用於爬取和視覺化東方Project人氣投票結果，支援第1回到第21回的完整數據分析
+東方Project人氣投票結果，支援第1回到第21回數據分析
 
 
 ## 功能
@@ -113,21 +113,19 @@ stats = processor.get_statistics()
 - **前端**：HTML + CSS + JavaScript + Plotly.js
 - **數據格式**：CSV + JSON
 
-## 注意事項
+## 注意
 
 - 需要安裝Chrome瀏覽器（Selenium會自動下載ChromeDriver）
-- 爬取所有21回數據可能需要較長時間（約30-60分鐘）
-- 網頁需要通過HTTP服務器訪問（不能直接打開HTML文件）
 - 某些早期回數的數據可能不完整或格式不同
 
 ## 未來功能
 
 - 添加更多統計圖表（如點數變化趨勢）
-- 實現角色比較功能
+- 角色比較功能
 - 添加數據導出功能
-- 實現自動化定期爬取
 - 單年度排名總覽
 - 音樂部門及作品部門
+
 
 
 
