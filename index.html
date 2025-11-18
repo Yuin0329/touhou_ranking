@@ -394,7 +394,7 @@
       transform: translateY(-1px) scale(1.02);
     }
 
-    /* 響應式設計 */
+
     @media (max-width: 768px) {
       .container {
         margin: 20px;
@@ -529,22 +529,18 @@
     let currentSearchIndex = -1;
     let currentTheme = 'light';
     
-    // 深色模式切換
+
     function toggleTheme() {
       currentTheme = currentTheme === 'light' ? 'dark' : 'light';
       document.body.setAttribute('data-theme', currentTheme);
       
       const themeToggle = document.querySelector('.theme-toggle');
       if (currentTheme === 'dark') {
-        themeToggle.innerHTML = '💮☯';
+        themeToggle.innerHTML = '☯';
         themeToggle.title = '切換淺色模式';
-      } else {
-        themeToggle.innerHTML = '🌟🧹';
-        themeToggle.title = '切換深色模式';
-      }
-    }
+      } 
     
-    // 載入角色列表
+
     async function loadCharacters() {
       try {
         const response = await fetch('characters.json');
@@ -575,7 +571,7 @@
       }
     }
     
-    // 載入投票數據
+
     async function loadVoteData() {
       try {
         const response = await fetch('touhou_vote_combined.csv');
@@ -618,7 +614,7 @@
       }
     }
     
-    // 填充回數選擇器
+  
     function fillRoundSelectors() {
       const startSelect = document.getElementById('roundRangeStart');
       const endSelect = document.getElementById('roundRangeEnd');
@@ -694,7 +690,7 @@
       updateStats(character);
     }
     
-    // 更新圖表範圍
+  
     function updateChartRange() {
       const startRound = parseInt(document.getElementById('roundRangeStart').value);
       const endRound = parseInt(document.getElementById('roundRangeEnd').value);
@@ -704,7 +700,7 @@
       }
     }
     
-    // 更新統計信息
+
     function updateStats(character) {
       const data = voteData[character];
       const statsDiv = document.getElementById('stats');
@@ -727,7 +723,7 @@
       }
     }
     
-    // 搜尋角色
+   
     function searchCharacters(query) {
       if (!query || query.length < 1) {
         hideSearchResults();
@@ -741,7 +737,7 @@
       showSearchResults(results);
     }
     
-    // 顯示搜尋結果
+   
     function showSearchResults(results) {
       const searchResultsDiv = document.getElementById('searchResults');
       searchResultsDiv.innerHTML = '';
@@ -764,14 +760,14 @@
       currentSearchIndex = -1;
     }
     
-    // 隱藏搜尋結果
+  
     function hideSearchResults() {
       document.getElementById('searchResults').style.display = 'none';
       searchResults = [];
       currentSearchIndex = -1;
     }
     
-    // 選擇角色
+  
     function selectCharacter(character) {
       document.getElementById('characterSearch').value = character;
       document.getElementById('characterSelect').value = character;
@@ -779,7 +775,6 @@
       updateChart(character);
     }
     
-    // 處理鍵盤導航
     function handleSearchKeydown(event) {
       const searchResultsDiv = document.getElementById('searchResults');
       
@@ -805,7 +800,7 @@
       }
     }
     
-    // 高亮搜尋結果
+  
     function highlightSearchResult() {
       const items = document.querySelectorAll('.search-result-item');
       items.forEach((item, index) => {
@@ -817,7 +812,7 @@
       });
     }
     
-    // 創建粒子效果
+ 
     function createParticles() {
       const particlesContainer = document.getElementById('particles');
       const particleCount = 15;
@@ -840,12 +835,12 @@
       }
     }
     
-    // 初始化
+
     async function init() {
       await loadCharacters();
       await loadVoteData();
       
-      // 創建粒子效果
+      
       createParticles();
       
       document.getElementById('characterSelect').addEventListener('change', function() {
@@ -873,3 +868,4 @@
   </script>
 </body>
 </html> 
+
